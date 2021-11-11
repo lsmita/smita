@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	IDLE_TIME_OUT = 10
+	IDLE_TIME_OUT = 10 //idle timeout in seconds
 )
 
 var lock = &sync.Mutex{}

@@ -6,6 +6,7 @@
 package session
 
 import (
+	"fmt"
 	"time"
 
 	uuid "github.com/nu7hatch/gouuid"
@@ -13,7 +14,7 @@ import (
 )
 
 const (
-	EXPIRE_INTERVAL = 15
+	EXPIRE_INTERVAL = 15 //expiry interval in seconds
 )
 
 type UserSession struct {
@@ -24,7 +25,7 @@ type UserSession struct {
 }
 
 /* Populate the user session with relevant fields on successful authentication */
-func Create(s *UserSession, user string) {
+func Create(s *UserSession, user string) error {
 	s.userName = user
 	now := time.Now().Unix()
 	s.expireTime = now + int64(EXPIRE_INTERVAL)
@@ -34,6 +35,8 @@ func Create(s *UserSession, user string) {
 	if err == nil {
 		s.ID = uid.String()
 	}
+
+	return err
 }
 
 /* Authenticates using user login credentials and creates a session object for
@@ -41,9 +44,14 @@ func Create(s *UserSession, user string) {
  */
 func (s *UserSession) Authenticate(username, password string) bool {
 	if users.Valid(username, password) {
-		Create(s, username)
-		GetInstance().insert(s)
-		return true
+		err := Create(s, username)
+
+		if err != nil {
+			fmt.Printf("Create User Session for '%s' failed. Reason: %s", username, err.Error())
+		} else {
+			GetInstance().insert(s)
+			return true
+		}
 	}
 
 	return false
